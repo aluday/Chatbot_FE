@@ -1,12 +1,30 @@
 import { AI, Human } from "../../../assets/icons";
 import { useState } from "react";
+import {
+  getConversationList,
+  sendAnswer,
+} from "../../../services/endpoint.service";
 
 const ChatWidget = () => {
-  const [message, setMessage] = useState("");
+  const [question, setQuestion] = useState("");
+  const [conversationList, setConversationList] = useState([]);
 
   const onTypingMessage = (event) => {
-    setMessage(event.target.value);
+    setQuestion(event.target.value);
   };
+
+  const handleSendQuestion = async (question) => {
+    let session_id = localStorage.getItem("sessionId");
+    console.log(session_id);
+    console.log(question);
+    await sendAnswer({ question, session_id }).then();
+
+    await getConversationList(session_id).then((res) => {
+      console.log(res);
+      setConversationList(res.data.conversation);
+    });
+  };
+
   const renderResponseTemplate = (text, isHuman) => {
     return (
       <div className="flex gap-3 my-4 text-gray-600 text-sm flex-1">
@@ -16,7 +34,7 @@ const ChatWidget = () => {
           </div>
         </span>
         <p className="leading-relaxed">
-          <span className="block font-bold text-gray-700">AI </span>
+          <span className="block font-bold text-gray-700">{isHuman ? "Human" : "AI"}</span>
           {text}
         </p>
       </div>
@@ -32,9 +50,12 @@ const ChatWidget = () => {
       </div>
 
       <div className="pr-4 h-[474px]">
-        {renderResponseTemplate("Hi", false)}
-
-        {renderResponseTemplate("Hello", true)}
+        {conversationList.map((value, index) => (
+          <div key={index}>
+            {renderResponseTemplate(value.question, true)}
+            {renderResponseTemplate(value.answer, false)}
+          </div>
+        ))}
       </div>
 
       <div class="flex items-center pt-0">
@@ -46,11 +67,12 @@ const ChatWidget = () => {
                             focus:ring-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 
                             text-[#030712] focus-visible:ring-offset-2"
             placeholder="Type your message"
-            value={message}
+            value={question}
             onChange={onTypingMessage}
           />
 
           <button
+            onClick={() => handleSendQuestion(question)}
             className="inline-flex items-center justify-center rounded-md text-sm font-medium 
                             text-[#f9fafb] disabled:pointer-events-none disabled:opacity-50
                             bg-black 

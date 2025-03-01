@@ -1,12 +1,18 @@
 import React from "react";
-import { Button, Input } from "../../common";
-import ChatWidget from "../chat/ChatWidget"
+import ChatWidget from "../chat/ChatWidget";
 import { Message } from "../../../assets/icons";
+import {createChatSession}  from "../../../services/endpoint.service.js";
 
 const UserHome = () => {
+  const handleCreateChatSession = () => {
+    createChatSession().then((res)=>{
+      localStorage.setItem("sessionId", res.data.session_id)
+    })
+  };
   return (
     <div className="h-screen overflow-hidden flex items-center justify-center border-2">
       <button
+        onClick={handleCreateChatSession}
         className="fixed bottom-4 right-4 inline-flex items-center justify-center text-sm font-medium 
                 disabled:pointer-events-none disabled:opacity-50 border rounded-full w-16 h-16
                 bg-black
